@@ -82,4 +82,9 @@ def load() -> Settings:
         kafka_key=os.getenv("KAFKA_API_KEY", ""),
         kafka_secret=os.getenv("KAFKA_API_SECRET", ""),
         kafka_topic=os.getenv("KAFKA_TOPIC", "f1.race.results"),
+        # Optional overrides, for example to build a second copy of the lakehouse for testing.
+        bronze=os.getenv("BRONZE_SCHEMA", "f1_bronze"),
+        silver=os.getenv("SILVER_SCHEMA", "f1_silver"),
+        gold=os.getenv("GOLD_SCHEMA", "f1_gold"),
+        checkpoint_prefix=os.getenv("CHECKPOINT_PREFIX", "checkpoints"),
     )

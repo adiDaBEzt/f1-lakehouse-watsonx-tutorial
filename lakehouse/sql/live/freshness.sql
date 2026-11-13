@@ -8,7 +8,7 @@ WITH kafka AS (
 ),
 lake AS (
   SELECT round, count(*) AS results_in_gold
-  FROM ${catalog}.f1_gold.fact_session_result
+  FROM ${catalog}.${gold}.fact_session_result
   WHERE season = 2026
   GROUP BY 1
 )

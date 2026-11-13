@@ -2,5 +2,5 @@
 SELECT committed_at, snapshot_id, operation,
        element_at(summary, 'added-records')   AS added,
        element_at(summary, 'deleted-records') AS deleted
-FROM ${catalog}.f1_silver."results$snapshots"
+FROM ${catalog}.${silver}."results$snapshots"
 ORDER BY committed_at

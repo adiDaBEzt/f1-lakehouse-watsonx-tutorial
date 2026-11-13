@@ -6,7 +6,7 @@ SELECT m.team_name,
        sum(CASE WHEN p.is_captain THEN 2 * d.points ELSE d.points END) AS fantasy_points
 FROM fantasy_pg.public.fantasy_picks p
 JOIN fantasy_pg.public.fantasy_managers m ON m.manager_id = p.manager_id
-JOIN ${catalog}.f1_gold.driver_season d ON d.driver_id = p.driver_id AND d.season = p.season
+JOIN ${catalog}.${gold}.driver_season d ON d.driver_id = p.driver_id AND d.season = p.season
 WHERE p.season = 2026
 GROUP BY 1, 2
 ORDER BY fantasy_points DESC
