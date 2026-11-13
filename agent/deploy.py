@@ -8,7 +8,7 @@ What it does, in order (each step prints the ADK command it runs):
    HTTP header on every call Orchestrate makes to the MCP server.
 3. Adds the watsonx.data MCP server as a remote toolkit, importing only read-only tools.
 4. Imports the knowledge base.
-5. Renders the agent YAML from .env and imports it.
+5. Renders the agent YAML from .env, imports it and deploys it to the live environment.
 """
 
 import base64
@@ -78,6 +78,8 @@ def main() -> None:
     out.write_text(rendered)
     run(["agents", "import", "-f", str(out)])
     must_exist("agents", "f1_race_analyst")
+    # Imported agents are drafts. Deploy publishes the agent so it appears in the chat UI.
+    run(["agents", "deploy", "--name", "f1_race_analyst"])
     print("\nDone. Open watsonx Orchestrate, select F1 Race Analyst and ask a question.")
 
 
