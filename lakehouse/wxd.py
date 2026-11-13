@@ -55,14 +55,14 @@ class WatsonxData:
             r = requests.put(url, data=f, headers={"Authorization": f"Bearer {self.token()}"}, timeout=120)
         r.raise_for_status()
 
-    def list_objects(self, prefix: str) -> list[tuple[str, int]]:
+    def list_objects(self, prefix: str, bucket: str | None = None) -> list[tuple[str, int]]:
         out, token = [], None
         ns = {"s3": "http://s3.amazonaws.com/doc/2006-03-01/"}
         while True:
             params = {"list-type": "2", "prefix": prefix}
             if token:
                 params["continuation-token"] = token
-            r = requests.get(f"{self.s.cos_endpoint}/{self.s.bucket}", params=params,
+            r = requests.get(f"{self.s.cos_endpoint}/{bucket or self.s.bucket}", params=params,
                              headers={"Authorization": f"Bearer {self.token()}"}, timeout=60)
             r.raise_for_status()
             root = ET.fromstring(r.content)

@@ -7,6 +7,7 @@
     python -m lakehouse stream        # Spark Structured Streaming: Kafka -> f1_bronze.race_events
     python -m lakehouse refresh       # stream + silver + gold, after a race
     python -m lakehouse counts        # row counts for every medallion table
+    python -m lakehouse files f1_silver.results   # the Parquet and metadata files behind a table
     python -m lakehouse register kafka|postgres   # attach a data source to Presto
     python -m lakehouse sql "SELECT ..."
     python -m lakehouse engines [pause|resume]
@@ -179,6 +180,20 @@ def cmd_sql(w: WatsonxData, a):
     _print_table(cols, rows, a.max_rows)
 
 
+def cmd_files(w: WatsonxData, a):
+    """Show the object-storage files behind an Iceberg table, for example f1_silver.results."""
+    schema, table = a.table.split(".")
+    prefix = f"{schema}/{table}/"
+    objs = w.list_objects(prefix, bucket=w.s.bucket)
+    data = [o for o in objs if "/data/" in o[0]]
+    meta = [o for o in objs if "/metadata/" in o[0]]
+    print(f"s3a://{w.s.bucket}/{prefix}")
+    print(f"  data/      {len(data):>4} Parquet files, {sum(s for _, s in data) / 1e6:.1f} MB")
+    print(f"  metadata/  {len(meta):>4} files (table metadata, manifests and one snapshot list per commit)")
+    for k, size in data[-3:] + meta[-3:]:
+        print(f"  {size:>8}  {k.removeprefix(prefix)}")
+
+
 def cmd_logs(w: WatsonxData, a):
     print_driver_log(w, a.app_id, only_ours=False)
 
@@ -216,6 +231,7 @@ def main():
     sub.add_parser("stream")
     sub.add_parser("refresh")
     lg = sub.add_parser("logs"); lg.add_argument("app_id")
+    fl = sub.add_parser("files"); fl.add_argument("table", help="schema.table, for example f1_silver.results")
     c = sub.add_parser("counts"); c.add_argument("layer", nargs="?")
     q = sub.add_parser("sql"); q.add_argument("statement"); q.add_argument("--max-rows", type=int, default=50)
     g = sub.add_parser("register"); g.add_argument("source", choices=["kafka", "postgres"])

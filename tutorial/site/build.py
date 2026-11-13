@@ -31,7 +31,9 @@ def slug(text: str) -> str:
 
 def build(out: Path) -> None:
     md = SOURCE.read_text()
-    html = markdown.markdown(md, extensions=["fenced_code", "tables"])
+    # superfences handles code blocks nested inside numbered steps; plain fenced_code does not.
+    html = markdown.markdown(md, extensions=["pymdownx.superfences", "pymdownx.highlight", "tables"],
+                             extension_configs={"pymdownx.highlight": {"use_pygments": False}})
     soup = BeautifulSoup(html, "html.parser")
 
     h1 = soup.find("h1")
@@ -62,7 +64,10 @@ def build(out: Path) -> None:
     # Code blocks.
     for pre in soup.find_all("pre"):
         code = pre.find("code")
-        lang = (code.get("class") or ["language-text"])[0].removeprefix("language-")
+        classes = (code.get("class") or []) + (pre.get("class") or [])
+        lang = next((c.removeprefix("language-") for c in classes if c.startswith("language-")), "text")
+        code.attrs = {}
+        pre.attrs = {}
         out_block = lang == "text"
         wrap = soup.new_tag("div", attrs={"class": "code out" if out_block else "code"})
         bar = soup.new_tag("div", attrs={"class": "code-bar"})
