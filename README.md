@@ -61,15 +61,8 @@ lakehouse/           CLI, watsonx.data clients, Spark jobs and SQL
 streaming/           Confluent producer
 postgres/            Fantasy-league schema, seed generator and loader
 agent/               Orchestrate agent template, knowledge base and deploy script
-tests/spark_local.sh Run any Spark job locally against a throwaway Iceberg catalog
 tutorial/            The tutorial text and screenshots
 ```
-
-## Testing
-
-- `tests/e2e.sh /path/to/.env` follows the whole tutorial from a fresh clone, in order, against
-  separate `e2e_*` schemas, and prints a pass or fail for every step. The last run passed all 29 steps.
-- `tests/spark_local.sh <job>.py` runs a Spark job locally against a throwaway Iceberg catalog.
 
 ## Data
 

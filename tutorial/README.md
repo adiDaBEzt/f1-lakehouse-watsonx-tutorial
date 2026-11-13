@@ -10,7 +10,7 @@ Land 75 years of Formula 1 history in Apache Iceberg with Spark, stream the live
 | **Steps** | 15 |
 | **Tested with** | watsonx.data 2.4 · watsonx Orchestrate ADK 2.20 |
 
-![Real-time medallion lakehouse: an F1 racing line through bronze, silver and gold timing sectors, with a live Kafka stream joining from the pit lane.](images/cover.jpg)
+![Real-time medallion lakehouse: raw files and live Kafka events land in Bronze, Spark cleans them into Silver, Presto builds Gold, PostgreSQL is federated alongside, and an AI analyst answers questions on top.](images/cover.jpg)
 
 ## Introduction
 
@@ -380,8 +380,6 @@ The filter matters. Iceberg rewrites every data file that holds a matched row, s
     ```
 
     Each quarantined row keeps the original record as JSON in `raw_record`, so you can fix the source and reload it.
-
-> **Tip:** `tests/spark_local.sh` runs any of the Spark jobs on your computer against a throwaway local Iceberg catalog in about 15 seconds. Use it to test a change before you submit it to watsonx.data. It needs a Java 17 runtime and `pip install pyspark==3.5.3`.
 
 ### Step 7. Build the Gold layer with Presto
 
