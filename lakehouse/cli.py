@@ -124,19 +124,27 @@ def cmd_refresh(w: WatsonxData, a):
     print(f"Lakehouse refreshed in {time.time() - t0:.0f}s")
 
 
-def run_sql_file(w: WatsonxData, path: Path) -> None:
-    text = path.read_text()
+def substitute(w: WatsonxData, text: str) -> str:
+    """Fill ${catalog}, ${bronze}, ${silver}, ${gold} and ${warehouse} from .env."""
     for k, v in {"catalog": w.s.catalog, "bronze": w.s.bronze, "silver": w.s.silver,
                  "gold": w.s.gold, "warehouse": w.s.warehouse}.items():
         text = text.replace("${" + k + "}", v)
-    text = re.sub(r"--[^\n]*", "", text)
+    return text
+
+
+def run_sql_file(w: WatsonxData, path: Path, quiet: bool = False):
+    """Run every statement in a .sql file; return the last statement's result."""
+    text = re.sub(r"--[^\n]*", "", substitute(w, path.read_text()))
+    result = ([], [])
     for stmt in (x.strip() for x in text.split(";")):
         if not stmt:
             continue
         head = " ".join(stmt.split())[:90]
         t0 = time.time()
-        w.sql(stmt)
-        print(f"  ✓ {head}{'…' if len(stmt) > 90 else ''}  ({time.time() - t0:.1f}s)")
+        result = w.sql(stmt)
+        if not quiet:
+            print(f"  ✓ {head}{'…' if len(stmt) > 90 else ''}  ({time.time() - t0:.1f}s)")
+    return result
 
 
 def cmd_gold(w: WatsonxData, _):
@@ -165,9 +173,9 @@ def cmd_sql(w: WatsonxData, a):
     stmt = a.statement if a.statement != "-" else sys.stdin.read()
     p = Path(stmt)
     if p.suffix == ".sql" and p.exists():
-        run_sql_file(w, p)
-        return
-    cols, rows = w.sql(stmt.replace("${catalog}", w.s.catalog))
+        cols, rows = run_sql_file(w, p, quiet=True)
+    else:
+        cols, rows = w.sql(substitute(w, stmt))
     _print_table(cols, rows, a.max_rows)
 
 

@@ -6,3 +6,4 @@ __pycache__/
 .orchestrate-home/
 agent/f1_race_analyst.yaml
 .bob/
+tutorial/site/index.html

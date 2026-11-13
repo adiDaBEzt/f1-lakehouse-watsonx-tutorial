@@ -8,7 +8,9 @@ streams in live from Confluent Cloud. A fantasy-league app database stays in Pos
 queries all three in one SQL statement, and an IBM watsonx Orchestrate agent answers questions in
 plain English through the watsonx.data MCP server.
 
-![Architecture: raw files and a Confluent topic flow through Bronze, Silver and Gold Iceberg tables on watsonx.data; Presto federates Iceberg, Kafka and PostgreSQL; an Orchestrate agent queries through the MCP server](tutorial/images/wxd-infrastructure.jpg)
+![Architecture: raw files and a Confluent topic flow through Bronze, Silver and Gold Iceberg tables on watsonx.data; Presto federates Iceberg, Kafka and PostgreSQL; an Orchestrate agent queries through the MCP server](tutorial/images/architecture.svg)
+
+The full step-by-step tutorial is in [`tutorial/README.md`](tutorial/README.md).
 
 ## What each piece does
 
