@@ -46,16 +46,24 @@ def must_exist(kind: str, name: str) -> None:
         sys.exit(f"{kind} '{name}' was not created; see the error above")
 
 
+def listed(kind: str, name: str) -> bool:
+    out = subprocess.run([ORCH, kind, "list"], capture_output=True, text=True,
+                         env={**os.environ, "COLUMNS": "300"}).stdout
+    return name in out
+
+
 def main() -> None:
     s = config.load()
     env_name = os.getenv("WXO_ENV_NAME", "f1-tutorial")
     url, key = os.environ["WXO_INSTANCE_URL"], os.environ["WXO_API_KEY"]
 
-    run(["env", "add", "-n", env_name, "-u", url, "--type", "ibm_iam"], check=False)
+    if not listed("env", env_name):
+        run(["env", "add", "-n", env_name, "-u", url, "--type", "ibm_iam"])
     run(["env", "activate", env_name, "--api-key", key], secret=key)
 
     basic = "Basic " + base64.b64encode(f"{s.wxd_user}:{s.api_key}".encode()).decode()
-    run(["connections", "add", "-a", CONNECTION], check=False)
+    if not listed("connections", CONNECTION):
+        run(["connections", "add", "-a", CONNECTION])
     for env in ("draft", "live"):
         run(["connections", "configure", "-a", CONNECTION, "--env", env, "--type", "team", "--kind", "key_value"],
             check=False)

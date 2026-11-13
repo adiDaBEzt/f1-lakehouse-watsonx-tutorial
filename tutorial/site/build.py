@@ -17,8 +17,6 @@ from bs4 import BeautifulSoup
 HERE = Path(__file__).resolve().parent
 SOURCE = HERE.parent / "README.md"
 
-FACTS = [("Author", "Aditya Krishnan"), ("Level", "Intermediate"), ("Time to complete", "About 90 minutes"),
-         ("Steps", "15"), ("Tested with", "watsonx.data 2.4 · ADK 2.20")]
 CODE_LABELS = {"bash": "Terminal", "python": "Python", "sql": "SQL", "yaml": "YAML", "ini": ".env",
                "text": "Expected output"}
 CALLOUTS = {"Note": "note", "Tip": "tip", "Important": "important"}
@@ -40,8 +38,15 @@ def build(out: Path) -> None:
     title = h1.get_text()
     deck = h1.find_next_sibling("p")
     deck_text = deck.get_text()
-    h1.decompose()
-    deck.decompose()
+    # The details table and the cover image after the deck go into the masthead.
+    facts_table = deck.find_next_sibling("table")
+    facts = [(r.find_all("td")[0].get_text(strip=True), r.find_all("td")[1].get_text(strip=True))
+             for r in facts_table.find("tbody").find_all("tr")]
+    cover_p = facts_table.find_next_sibling("p")
+    cover = cover_p.find("img")
+    cover_html = f'<img class="cover" src="{cover["src"]}" alt="{cover["alt"]}">'
+    for el in (h1, deck, facts_table, cover_p):
+        el.decompose()
 
     # Headings: ids, and step markup for "Step N. Name".
     nav_items = []
@@ -79,12 +84,14 @@ def build(out: Path) -> None:
         pre.wrap(wrap)
         wrap.insert(0, bar)
 
-    # Figures: an image alone in a paragraph, with its title as the caption.
+    # Figures: an image alone in a paragraph, captioned by the italic paragraph that follows it.
     for img in soup.find_all("img"):
         p = img.parent
-        caption = img.get("title") or img.get("alt")
-        if "title" in img.attrs:
-            del img["title"]
+        caption = img.get("alt")
+        nxt = p.find_next_sibling()
+        if nxt is not None and nxt.name == "p" and len(nxt.contents) == 1 and getattr(nxt.contents[0], "name", None) == "em":
+            caption = nxt.get_text()
+            nxt.decompose()
         img["loading"] = "lazy"
         fig = soup.new_tag("figure")
         a = soup.new_tag("a", attrs={"href": img["src"], "target": "_blank", "rel": "noopener"})
@@ -146,7 +153,7 @@ def build(out: Path) -> None:
     if in_steps:
         nav.append("</ol>")
 
-    facts = "".join(f"<div><dt>{k}</dt><dd>{v}</dd></div>" for k, v in FACTS)
+    facts_html = "".join(f"<div><dt>{k}</dt><dd>{v}</dd></div>" for k, v in facts)
     page = f"""<title>F1 Medallion Lakehouse</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -159,7 +166,8 @@ def build(out: Path) -> None:
   <p class="eyebrow">Tutorial · watsonx.data · Confluent · watsonx Orchestrate</p>
   <h1>{title}</h1>
   <p class="deck">{deck_text}</p>
-  <dl class="facts">{facts}</dl>
+  <dl class="facts">{facts_html}</dl>
+  {cover_html}
 </header>
 
 <div class="wrap">

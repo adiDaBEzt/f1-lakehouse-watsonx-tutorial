@@ -65,6 +65,12 @@ tests/spark_local.sh Run any Spark job locally against a throwaway Iceberg catal
 tutorial/            The tutorial text and screenshots
 ```
 
+## Testing
+
+- `tests/e2e.sh /path/to/.env` follows the whole tutorial from a fresh clone, in order, against
+  separate `e2e_*` schemas, and prints a pass or fail for every step. The last run passed all 29 steps.
+- `tests/spark_local.sh <job>.py` runs a Spark job locally against a throwaway Iceberg catalog.
+
 ## Data
 
 Historical results are derived from the open Ergast/Jolpica Formula 1 dataset. The fantasy-league

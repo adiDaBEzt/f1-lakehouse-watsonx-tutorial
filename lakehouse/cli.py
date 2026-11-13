@@ -113,7 +113,7 @@ def cmd_stream(w: WatsonxData, _):
                env={"KAFKA_BOOTSTRAP": s.kafka_bootstrap, "KAFKA_API_KEY": s.kafka_key,
                     "KAFKA_API_SECRET": s.kafka_secret})
     _, r = w.sql(f"SELECT count(*) FROM {s.catalog}.{s.bronze}.race_events")
-    print(f"f1_bronze.race_events now holds {r[0][0]} Kafka messages")
+    print(f"{s.bronze}.race_events now holds {r[0][0]} Kafka messages")
 
 
 def cmd_refresh(w: WatsonxData, a):

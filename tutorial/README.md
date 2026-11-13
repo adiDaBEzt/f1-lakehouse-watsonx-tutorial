@@ -2,6 +2,16 @@
 
 Land 75 years of Formula 1 history in Apache Iceberg with Spark, stream the live season in from Confluent Cloud, join it to a PostgreSQL app database with Presto, and let an IBM watsonx Orchestrate agent answer questions about all of it in plain English.
 
+| Detail | Value |
+|---|---|
+| **Author** | Aditya Krishnan |
+| **Level** | Intermediate |
+| **Time to complete** | About 90 minutes |
+| **Steps** | 15 |
+| **Tested with** | watsonx.data 2.4 · watsonx Orchestrate ADK 2.20 |
+
+![Real-time medallion lakehouse: an F1 racing line through bronze, silver and gold timing sectors, with a live Kafka stream joining from the pit lane.](images/cover.jpg)
+
 ## Introduction
 
 Most data teams end up with three kinds of data that never quite meet. Years of history sit in files or a warehouse. Today's events arrive on a Kafka topic. The application that people actually use keeps its own operational database. Answering a simple question such as *"who is leading right now?"* means copying data between all three, and by the time it has been copied, it is out of date.
@@ -35,7 +45,9 @@ The first question needs all three sources: the fantasy picks live in PostgreSQL
 
 ## Architecture
 
-![Architecture: historical files land in Cloud Object Storage and Confluent carries live results; Spark builds the bronze and silver layers, Presto builds gold and federates Iceberg, Kafka and PostgreSQL; a watsonx Orchestrate agent queries through the watsonx.data MCP server.](images/architecture.svg "The F1 lakehouse. Confluent feeds both the streaming load into Bronze and Presto's live queries.")
+![Architecture: historical files land in Cloud Object Storage and Confluent carries live results; Spark builds the bronze and silver layers, Presto builds gold and federates Iceberg, Kafka and PostgreSQL; a watsonx Orchestrate agent queries through the watsonx.data MCP server.](images/architecture.svg)
+
+*The F1 lakehouse. Confluent feeds both the streaming load into Bronze and Presto's live queries.*
 
 The solution has five parts:
 
@@ -58,7 +70,9 @@ watsonx.data separates storage from compute. All the lakehouse data is files in 
 
 So when Spark "writes a table", it writes Parquet files to the warehouse bucket and then moves the table's pointer in the metastore to a new snapshot. In watsonx.data, the warehouse bucket is associated with the Iceberg catalog. You can see the association in **Infrastructure manager**: switch to the list view and select **Storage**.
 
-![The Storage list in watsonx.data Infrastructure manager: the cos-bucket storage is associated with the Iceberg catalog, and ibm-cos-bucket with sample_data.](images/wxd-storage-catalog.png "The warehouse bucket is associated with the Iceberg catalog. The topology view doesn't draw this link, but the list view shows it.")
+![The Storage list in watsonx.data Infrastructure manager: the cos-bucket storage is associated with the Iceberg catalog, and ibm-cos-bucket with sample_data.](images/wxd-storage-catalog.png)
+
+*The warehouse bucket is associated with the Iceberg catalog. The topology view doesn't draw this link, but the list view shows it.*
 
 ## Prerequisites
 
@@ -293,7 +307,9 @@ for table, (fmt, path, opts) in SOURCES.items():
 
 2. Open the Spark engine in **Infrastructure manager** and select the **Applications** tab. You see each job you submit, with its status and timings.
 
-![The Applications tab of the Spark engine in watsonx.data, listing the f1-bronze-ingest, f1-silver-transform and f1-stream-ingest jobs, all finished.](images/wxd-spark-applications.png "The pipeline's Spark jobs on the watsonx.data Spark engine.")
+![The Applications tab of the Spark engine in watsonx.data, listing the f1-bronze-ingest, f1-silver-transform and f1-stream-ingest jobs, all finished.](images/wxd-spark-applications.png)
+
+*The pipeline's Spark jobs on the watsonx.data Spark engine.*
 
 > **Tip:** If a job fails, the CLI prints the errors from the Spark driver log. You can also print them later with `python -m lakehouse logs <application-id>`.
 
@@ -437,7 +453,9 @@ The fact table is partitioned by season, because almost every question filters o
 
     Ayrton Senna was the 1988 champion. Before 1991 only a driver's best results counted towards the title, so the total points don't tell the whole story. This is why the column is called `points_rank` and not `championship_position`. In Step 13 you give the agent a knowledge base that explains this, so it doesn't make the mistake in conversation.
 
-![The Gold-layer tables in the watsonx.data metastore browser, with a data sample of driver_season.](images/wxd-gold-sample.jpg "The Gold layer in the watsonx.data console.")
+![The Gold-layer tables in the watsonx.data metastore browser, with a data sample of driver_season.](images/wxd-gold-sample.jpg)
+
+*The Gold layer in the watsonx.data console.*
 
 ## Part 3. Add real-time data with Confluent
 
@@ -481,7 +499,9 @@ In this step, you create the Kafka cluster and publish the first race of the 202
 
 Each message is keyed by season, round and driver, for example `2026-1-russell`. The key means that publishing a race twice is harmless, because Silver merges on the same natural key.
 
-![The f1.race.results topic in Confluent Cloud, showing keyed race-result messages with their partition and offset.](images/confluent-topic-messages.jpg "Race results on the Confluent topic. Each message is one driver's result.")
+![The f1.race.results topic in Confluent Cloud, showing keyed race-result messages with their partition and offset.](images/confluent-topic-messages.jpg)
+
+*Race results on the Confluent topic. Each message is one driver's result.*
 
 ### Step 9. Query the live topic from Presto
 
@@ -540,7 +560,9 @@ In this step, you register the Confluent cluster as a Presto catalog, and query 
 
 3. In the watsonx.data console, open the metastore browser, expand `kafka_live`, and open the **Data sample** tab of `f1.race.results`. The topic looks like any other table.
 
-![The Kafka topic f1.race.results browsed as a Presto table in watsonx.data, with partition, offset and the raw JSON message.](images/wxd-kafka-table.jpg "The Confluent topic as a Presto table. No pipeline has run yet.")
+![The Kafka topic f1.race.results browsed as a Presto table in watsonx.data, with partition, offset and the raw JSON message.](images/wxd-kafka-table.jpg)
+
+*The Confluent topic as a Presto table. No pipeline has run yet.*
 
 ### Step 10. Land the stream in the lakehouse
 
@@ -584,7 +606,9 @@ q = (stream.writeStream.foreachBatch(write_batch)
 
     The last snapshot is the stream's append of 22 rows. In the console, the **Time travel** tab of the table shows the same history, and lets you roll back to any snapshot.
 
-    ![The Time travel tab of f1_silver.results in watsonx.data, listing the table's snapshots with their operations and record counts.](images/wxd-time-travel.jpg "The Iceberg snapshot history of the Silver results table.")
+    ![The Time travel tab of f1_silver.results in watsonx.data, listing the table's snapshots with their operations and record counts.](images/wxd-time-travel.jpg)
+
+    *The Iceberg snapshot history of the Silver results table.*
 
     Each snapshot is a set of files in the warehouse bucket. List the files behind the table:
 
@@ -693,11 +717,15 @@ The fantasy league is a separate application with its own PostgreSQL database: 4
 
     Run it in the watsonx.data SQL worksheet to see the result next to the query:
 
-    ![A Presto query in the watsonx.data SQL worksheet that joins the Kafka topic, the fantasy_pg PostgreSQL catalog and the Iceberg Gold layer, with ten result rows.](images/wxd-federated-query.jpg "One Presto query across Kafka (race points), PostgreSQL (fantasy picks) and Iceberg (career wins).")
+    ![A Presto query in the watsonx.data SQL worksheet that joins the Kafka topic, the fantasy_pg PostgreSQL catalog and the Iceberg Gold layer, with ten result rows.](images/wxd-federated-query.jpg)
+
+    *One Presto query across Kafka (race points), PostgreSQL (fantasy picks) and Iceberg (career wins).*
 
 6. Open **Infrastructure manager**. The topology now shows both engines, all four catalogs and both buckets:
 
-    ![The watsonx.data Infrastructure manager topology: the Spark and Presto engines connected to the Iceberg, sample, fantasy_pg (PostgreSQL) and kafka_live (Apache Kafka) catalogs, and two storage buckets.](images/wxd-infrastructure.jpg "The finished lakehouse in Infrastructure manager.")
+    ![The watsonx.data Infrastructure manager topology: the Spark and Presto engines connected to the Iceberg, sample, fantasy_pg (PostgreSQL) and kafka_live (Apache Kafka) catalogs, and two storage buckets.](images/wxd-infrastructure.jpg)
+
+    *The finished lakehouse in Infrastructure manager.*
 
 ## Part 5. Add the AI analyst
 
@@ -711,7 +739,9 @@ watsonx.data includes a Model Context Protocol (MCP) server. Its tools list cata
 
 1. In the watsonx.data console, open **Configurations > MCP server**. Note the **MCP URL endpoint** and the **Instance CRN**.
 
-    ![The MCP server page in the watsonx.data console, showing the MCP URL endpoint, the instance CRN and the available tools.](images/wxd-mcp-server.png "The watsonx.data MCP server.")
+    ![The MCP server page in the watsonx.data console, showing the MCP URL endpoint, the instance CRN and the available tools.](images/wxd-mcp-server.png)
+
+    *The watsonx.data MCP server.*
 
 2. In watsonx Orchestrate, click your avatar, then **Settings > API details**. Copy the **Service instance URL** and generate an API key. Put both in `.env`:
 
@@ -782,7 +812,9 @@ The knowledge base, `agent/knowledge_base/f1_lakehouse_guide.txt`, is the semant
 
 2. In watsonx Orchestrate, open **Build > Agents > F1 Race Analyst** and select the **Tools** tab. You see the four watsonx.data tools, each of type MCP.
 
-![The Tools tab of the F1 Race Analyst agent in watsonx Orchestrate, showing four watsonx_data tools of type MCP.](images/wxo-agent-tools.jpg "The agent's tools come straight from the watsonx.data MCP server.")
+![The Tools tab of the F1 Race Analyst agent in watsonx Orchestrate, showing four watsonx_data tools of type MCP.](images/wxo-agent-tools.jpg)
+
+*The agent's tools come straight from the watsonx.data MCP server.*
 
 > **Note:** Imported agents are drafts. They answer in the agent builder's preview and in `orchestrate chat ask`, but they appear in the chat UI only after `orchestrate agents deploy`. The deploy script runs it for you.
 
@@ -792,15 +824,21 @@ In this step, you ask the agent questions that span the lakehouse and the app da
 
 1. In watsonx Orchestrate, open **Chat** and select **F1 Race Analyst**. The agent shows its welcome message and three starter prompts.
 
-    ![The watsonx Orchestrate chat with the F1 Race Analyst selected, showing its welcome message and the starter prompts 2026 standings, Reliability and Fantasy league.](images/wxo-agent-welcome.jpg "The F1 Race Analyst in watsonx Orchestrate chat.")
+    ![The watsonx Orchestrate chat with the F1 Race Analyst selected, showing its welcome message and the starter prompts 2026 standings, Reliability and Fantasy league.](images/wxo-agent-welcome.jpg)
+
+    *The F1 Race Analyst in watsonx Orchestrate chat.*
 
 2. Click **Fantasy league**. The agent answers with the league table, computed from the PostgreSQL picks and the Iceberg points:
 
-    ![The agent's answer: the 2026 fantasy league standings table, with Chicane United leading on 75 points.](images/wxo-agent-fantasy.jpg "The agent's answer to the federated fantasy-league question.")
+    ![The agent's answer: the 2026 fantasy league standings table, with Chicane United leading on 75 points.](images/wxo-agent-fantasy.jpg)
+
+    *The agent's answer to the federated fantasy-league question.*
 
 3. Click **Show Reasoning** and expand the steps. The agent first searched the knowledge base for the scoring rules, then called `watsonxdata-execute-select` with a query it wrote, joining `fantasy_pg` to the Gold layer:
 
-    ![The agent's reasoning trace, showing the watsonxdata-execute-select tool call with SQL that joins fantasy_pg.public.fantasy_picks to the lakehouse.](images/wxo-agent-trace.jpg "The reasoning trace: the agent writes federated SQL and runs it through the MCP server.")
+    ![The agent's reasoning trace, showing the watsonxdata-execute-select tool call with SQL that joins fantasy_pg.public.fantasy_picks to the lakehouse.](images/wxo-agent-trace.jpg)
+
+    *The reasoning trace: the agent writes federated SQL and runs it through the MCP server.*
 
 4. Try the other starter prompts, and questions of your own, for example:
     - *Who has the most wins ever at Monaco?*
@@ -823,7 +861,9 @@ In this step, a race finishes, the results are queryable at once, the lakehouse 
 
     In Confluent Cloud, open the topic's **Messages** tab. The chart shows one message per finisher as the race was published. *Consumption in last hour* counts every read by Presto's live queries and by the Spark streaming job.
 
-    ![The f1.race.results topic in Confluent Cloud: 22 messages produced in the last hour, 264 consumed, 44 in total, with a chart of messages arriving one by one.](images/confluent-topic-activity.jpg "Round 2 arriving on the topic. Presto and Spark both consume it.")
+    ![The f1.race.results topic in Confluent Cloud: 22 messages produced in the last hour, 264 consumed, 44 in total, with a chart of messages arriving one by one.](images/confluent-topic-activity.jpg)
+
+    *Round 2 arriving on the topic. Presto and Spark both consume it.*
 
 2. Ask Presto where each race is now. `lakehouse/sql/live/freshness.sql` compares the topic with the Gold layer:
 
@@ -838,7 +878,9 @@ In this step, a race finishes, the results are queryable at once, the lakehouse 
     2      Chinese Grand Prix     22                0                only on Kafka
     ```
 
-    ![The freshness query in the watsonx.data SQL worksheet: round 1 is in the lakehouse and round 2 is only on Kafka.](images/wxd-freshness-before.jpg "Seconds after the race: Round 2 is on Kafka, and the lakehouse hasn't loaded it yet.")
+    ![The freshness query in the watsonx.data SQL worksheet: round 1 is in the lakehouse and round 2 is only on Kafka.](images/wxd-freshness-before.jpg)
+
+    *Seconds after the race: Round 2 is on Kafka, and the lakehouse hasn't loaded it yet.*
 
 3. You don't have to wait for the pipeline to see the championship. `lakehouse/sql/live/live_standings.sql` adds the points that are still only on Kafka to the Gold-layer standings:
 
@@ -851,7 +893,9 @@ In this step, a race finishes, the results are queryable at once, the lakehouse 
     Lewis Hamilton         12.0              15.0         27.0
     ```
 
-    ![The live standings query in the watsonx.data SQL worksheet, showing lakehouse points, live Kafka points and total points for each driver.](images/wxd-live-standings.jpg "Real-time standings: Gold-layer history plus the race still on Kafka, in one query.")
+    ![The live standings query in the watsonx.data SQL worksheet, showing lakehouse points, live Kafka points and total points for each driver.](images/wxd-live-standings.jpg)
+
+    *Real-time standings: Gold-layer history plus the race still on Kafka, in one query.*
 
 4. Let the lakehouse catch up:
 
@@ -873,11 +917,15 @@ In this step, a race finishes, the results are queryable at once, the lakehouse 
 
     Run the freshness query again. Both rounds are now in the lakehouse:
 
-    ![The freshness query after the refresh: rounds 1 and 2 are both in the lakehouse.](images/wxd-freshness-after.jpg "After the refresh, the lakehouse has caught up with Kafka.")
+    ![The freshness query after the refresh: rounds 1 and 2 are both in the lakehouse.](images/wxd-freshness-after.jpg)
+
+    *After the refresh, the lakehouse has caught up with Kafka.*
 
 5. Ask the agent: *Who leads the 2026 championship after the Chinese Grand Prix?* It answers from the refreshed Gold layer:
 
-    ![The agent's answer: Andrea Kimi Antonelli and George Russell tied on 43 points, each with one win and two podiums.](images/wxo-agent-round2.jpg "The agent answers with the race that finished minutes ago.")
+    ![The agent's answer: Andrea Kimi Antonelli and George Russell tied on 43 points, each with one win and two podiums.](images/wxo-agent-round2.jpg)
+
+    *The agent answers with the race that finished minutes ago.*
 
 > **Tip:** On the Lite plan, engines use resource units even when idle. Pause Presto when you stop working with `.venv/bin/python -m lakehouse engines pause`, and resume it with `engines resume`. The Lite plan doesn't allow pausing the Spark engine, but Spark uses no compute between jobs.
 
