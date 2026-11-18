@@ -110,8 +110,8 @@ In this step, you clone the repository and create a Python environment with ever
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/adiDaBEzt/f1-lakehouse-watsonx-tutorial.git
-    cd f1-lakehouse-watsonx-tutorial
+    git clone https://github.com/IBM/oic-i-agentic-ai-tutorials.git
+    cd oic-i-agentic-ai-tutorials/i-oic-f1-realtime-lakehouse-wxd-confluent
     ```
 
 2. Create the virtual environment and install the dependencies:
@@ -986,6 +986,6 @@ You built a lakehouse on IBM watsonx.data that keeps 75 years of Formula 1 resul
 - **Add access policies.** Use watsonx.data data access policies to mask the fantasy managers' names for some users, and see the agent respect them.
 - **Connect a BI tool.** Point a dashboard at the same Presto catalogs, so the dashboard and the agent answer from the same tables.
 
-The complete source is in the [GitHub repository](https://github.com/adiDaBEzt/f1-lakehouse-watsonx-tutorial).
+The complete source is in the [GitHub repository](https://github.com/IBM/oic-i-agentic-ai-tutorials/tree/main/i-oic-f1-realtime-lakehouse-wxd-confluent).
 
 To learn more, see the [watsonx.data documentation](https://www.ibm.com/docs/en/watsonxdata/saas), the [watsonx Orchestrate ADK documentation](https://developer.watson-orchestrate.ibm.com/) and the [Confluent Cloud documentation](https://docs.confluent.io/cloud/current/overview.html).

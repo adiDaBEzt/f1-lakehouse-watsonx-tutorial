@@ -12,6 +12,8 @@ plain English through the watsonx.data MCP server.
 
 The full step-by-step tutorial is in [`tutorial/README.md`](tutorial/README.md).
 
+The official home of this code is the IBM repository: [IBM/oic-i-agentic-ai-tutorials/i-oic-f1-realtime-lakehouse-wxd-confluent](https://github.com/IBM/oic-i-agentic-ai-tutorials/tree/main/i-oic-f1-realtime-lakehouse-wxd-confluent).
+
 ## What each piece does
 
 | Layer | Engine | Code |
